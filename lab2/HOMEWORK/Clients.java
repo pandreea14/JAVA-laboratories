@@ -1,36 +1,17 @@
-import java.time.LocalTime;
 import java.util.Objects;
 import java.util.Random;
 
 public class Clients {
     String name;
-    LocalTime minTime;
-    LocalTime maxTime;
     static int[][] timeInterval;
-    ClientType type;
+    Type clientType;
 
-    public Clients(String name, LocalTime minTime, LocalTime maxTime, ClientType type) {
+    public Clients(String name, Type clientType) {
         this.name = name;
-        this.minTime = minTime;
-        this.maxTime = maxTime;
-        this.type = type;
+        this.clientType = clientType;
     }
 
-    public Clients(String name, LocalTime minTime, LocalTime maxTime) {
-        this.name = name;
-        this.minTime = minTime;
-        this.maxTime = maxTime;
-    }
-
-    public Clients() {
-    }
-
-    public Clients(String name, ClientType type) {
-        this(name, null, null);
-        this.type = type;
-    }
-
-    public enum ClientType {
+    public enum Type {
         REGULAR, PREMIUM;
     }
 
@@ -41,8 +22,10 @@ public class Clients {
         this.name = name;
     }
 
-    /** aici se face alocarea random a intervalului de timp in care un vehicul ajunge de la un client la altul
-     *
+    /** aici se face alocarea random a intervalului de timp in care un vehicul ajunge de la un client la altul (1-9)
+     * timpul dintre un client si el insusi e 0 si la fel si timpul depot-depot
+     * matricea este simetrica fata de diagonala principala
+     * pt tema, consider ca exista 'drum' aka interval de timp intre toti clientii si orice client-depou
      * @param locations sunt nr total de noduri din graf (clienti+depots)
      */
     public static void setTimeInterval(int locations) {
@@ -50,10 +33,10 @@ public class Clients {
         Clients.timeInterval = new int[locations+1][locations+1];
         for (int i=1; i<=locations; i++) {
             for (int j=1; j<=locations; j++) {
-                if (i==j || (i>5 && j>5)) { // distanta dintre un client si el insusi e 0 + dist depot-depot
+                if (i==j || (i>5 && j>5)) {
                     Clients.timeInterval[i][j] = 0;
                 } else if (j>i) {
-                    Clients.timeInterval[i][j] = random.nextInt(9) + 1; //nr intre 1 si 10
+                    Clients.timeInterval[i][j] = random.nextInt(9) + 1;
                 } else {
                     Clients.timeInterval[i][j] = Clients.timeInterval[j][i];
                 }
@@ -63,30 +46,30 @@ public class Clients {
     public static int[][] getTimeInterval() {
         return timeInterval;
     }
-
-    public LocalTime getMinTime() {
-        return minTime;
+    public static void printTimeIntervalMatrix() {
+        int[][] timeMatrix = Clients.getTimeInterval();
+        System.out.println("Time interval matrix is: ");
+        for (int i = 1; i < timeMatrix.length; i++) {
+            for (int j = 1; j < timeMatrix[i].length; j++) {
+                System.out.print(timeMatrix[i][j] + " ");
+            }
+            System.out.println();
+        }
     }
 
-    public void setMinTime(LocalTime minTime) {
-        this.minTime = minTime;
+    public Type getClientType() {
+        return clientType;
+    }
+    public void setClientType(Type clientType) {
+        this.clientType = clientType;
     }
 
-    public LocalTime getMaxTime() {
-        return maxTime;
-    }
-
-    public void setMaxTime(LocalTime maxTime) {
-        this.maxTime = maxTime;
-    }
-
-    public ClientType getClientType() {
-        return type;
-    }
-    public void setClientType(ClientType type) {
-        this.type = type;
-    }
-
+    /** verifies if the client needs to be added as new
+     *
+     * @param c the given client
+     * @param clients the existing clients
+     * @return true if the client is new and needs to be added, false otherwise
+     */
     public boolean verifyUniqueness(Clients c, Clients... clients) {
         for(Clients client : clients) {
             if (client.equals(c)) {
@@ -102,7 +85,7 @@ public class Clients {
     public String toString() {
         return "Clients{" +
                 "name='" + name + '\'' +
-                ", clientType=" + type +
+                ", clientType=" + clientType +
                 '}';
     }
 
@@ -111,11 +94,11 @@ public class Clients {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Clients clients = (Clients) o;
-        return Objects.equals(name, clients.name) && type == clients.type;
+        return Objects.equals(name, clients.name) && clientType == clients.clientType;
     }
     @Override
     public int hashCode() {
-        return Objects.hash(name, type);
+        return Objects.hash(name, clientType);
     }
 
 }

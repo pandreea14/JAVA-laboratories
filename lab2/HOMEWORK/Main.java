@@ -1,61 +1,60 @@
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
 // We consider the problem of allocating clients to vehicles, such that all clients are visited (if possible).
+// Modify the algorithm that allocates clients to vehicles, such that the vehicles will travel on the shortest paths when moving from the depot to the clients, from one client to another or back to the depot.
+// Can you improve the complexity of the algorithm if all the values in the cost matrix are the same?
 public class Main {
     static List<Tour> tours = new ArrayList<>(); //static pt ca trb folosit si in cealalta functie
 
     public static void main(String[] args) {
         Problem problem = new Problem();
 
-        Clients clientKiki = new Clients();
-        clientKiki.setName("kiki");
-        clientKiki.setClientType(Clients.ClientType.REGULAR);
-        clientKiki.setMinTime(LocalTime.of(8,0));
-        clientKiki.setMaxTime(LocalTime.of(12,10));
-        System.out.println(clientKiki);
-        Clients clientGigi = new Clients("Gigi", Clients.ClientType.REGULAR);
-        System.out.println(clientGigi);
-        Clients clientDidi = new Clients("Didi", LocalTime.NOON, LocalTime.MIDNIGHT, Clients.ClientType.PREMIUM);
-        System.out.println(clientDidi);
-        Clients clientMimi = new Clients("Mimi", Clients.ClientType.PREMIUM);
-        System.out.println(clientMimi);
-        Clients clientCici = new Clients("Cici", Clients.ClientType.PREMIUM);
-        System.out.println(clientCici);
+        Clients[] client = new Clients[5];
+        client[0] = new Clients("kiki", Clients.Type.PREMIUM);
+        System.out.println(client[0]);
+        client[1] = new Clients("mimi", Clients.Type.REGULAR);
+        System.out.println(client[1]);
+        client[2] = new Clients("didi", Clients.Type.PREMIUM);
+        System.out.println(client[2]);
+        client[3] = new Clients("cici", Clients.Type.REGULAR);
+        System.out.println(client[3]);
+        client[4] = new Clients("hihi", Clients.Type.PREMIUM);
+        System.out.println(client[4]);
 
-        Depots depotNorth = new Depots("gara de nord");
-        System.out.println(depotNorth);
-        Depots depotSouth = new Depots("gara de sud");
-        System.out.println(depotSouth);
-        Depots depotEast = new Depots("gara de est");
-        System.out.println(depotEast);
+        // adding the clients to the problem
+        problem.addClients(client);
 
-        Vehicles porumb = new Drones("teVad1000", "purple", "porumb");
-        Vehicles caruta = new Trucks("calatara", "red", "caruta");
-        Vehicles tesla = new Trucks("elonMusk", "royalblue", "tesla");
+        Depots[] depot = new Depots[3];
+        depot[0] = new Depots("gara de nord", "bucuresti");
+        System.out.println(depot[0]);
+        depot[1] = new Depots("gara de sud", "onesti");
+        System.out.println(depot[1]);
+        depot[2] = new Depots("gara de est", "galati");
+        System.out.println(depot[2]);
 
-        // adding the vehicles to the existent depots
-        depotSouth.setVehicles(porumb, caruta);
-        depotNorth.setVehicles(tesla);
-
-        porumb.setDepot(depotSouth);
-        caruta.setDepot(depotSouth);
-        tesla.setDepot(depotNorth);
-
-        // prints all vehicles using getVehicles from the Problem class
-        problem.printVehicles(depotEast, depotNorth, depotSouth);
-
+        problem.addDepots(depot);
 
         // setting the time interval matrix, known by each client
         // it represents each time interval between a client-depot or client-client
         Clients.setTimeInterval(8);
-        printTimeIntervalMatrix();
+        Clients.printTimeIntervalMatrix();
 
+        Vehicles[] vehicle = new Vehicles[3];
+        vehicle[0] = new Drones("teVad1000", "blue", "porumb");
+        vehicle[1] = new Trucks("calatara", "red", "caruta");
+        vehicle[2] = new Trucks("elonMusk", "green", "tesla");
+
+        // adding the vehicles to the existent depots
+        depot[1].setVehicles(vehicle[0], vehicle[1]);
+        depot[0].setVehicles(vehicle[2]);
+
+        // prints all vehicles using getVehicles from the Problem class
+        problem.printVehicles();
 
         // the greedy allocation of the clients to the vehicles
-        allocateClients(depotSouth, porumb, clientCici, clientDidi);
-        allocateClients(depotNorth, tesla, clientKiki, clientMimi, clientGigi);
+        allocateClients(depot[1], vehicle[0], client[0], client[1], client[2], client[3], client[4]);
+        allocateClients(depot[0], vehicle[2], client[0], client[1], client[2], client[3], client[4]);
 
         for(Tour tour : tours) {
             System.out.println(tour);
@@ -71,37 +70,16 @@ public class Main {
      * @param clients the clients visited in the specific tour
      */
     public static void allocateClients(Depots depot, Vehicles vehicle, Clients... clients) {
-        // check if the depot and vehicle are null
-        if (depot == null || vehicle == null) {
-            System.out.println("Depot or vehicle is null. Cannot to allocate clients.");
-            return;
-        }
-
         Tour tour = new Tour(depot, vehicle);
         for (Clients client : clients) {
-            //System.out.println("i am here");
-            vehicle.setClients(client); //allocates the client to the vehicle
-
             if (vehicle.canTour(client)) {
-                System.out.println("i am here");
-                tour.addClients(client);    //allocates the client in the tour ?????????????????????????????????????????????
+                System.out.println("Vehicle " + vehicle.getName() + " can tour to client " + client.getName());
+                vehicle.addClients(client); //allocates the client to the vehicle
+                tour.addClients(client);    //allocates the client in the tour
             } else {
                 System.out.println("Vehicle " + vehicle.getName() + " cannot tour to client " + client.getName());
-                System.out.println("Tour not possible.");
-                return;
             }
         }
         tours.add(tour);
-    }
-
-    public static void printTimeIntervalMatrix() {
-        int[][] timeMatrix = Clients.getTimeInterval();
-        System.out.println("Time interval matrix is: ");
-        for (int i = 1; i < timeMatrix.length; i++) {
-            for (int j =1; j < timeMatrix[i].length; j++) {
-                System.out.print(timeMatrix[i][j] + " ");
-            }
-            System.out.println();
-        }
     }
 }

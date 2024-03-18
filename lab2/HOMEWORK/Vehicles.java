@@ -2,32 +2,28 @@ import java.util.Arrays;
 import java.util.Objects;
 
 abstract class Vehicles {
-    String name;
     String registrationNumber;
     String color;
-    Clients[] clients;
-    Depots depot;
 
     public Vehicles(String registrationNumber, String color, String name) {
         this.registrationNumber = registrationNumber;
         this.color = color;
         this.name = name;
     }
+
+    String name;
+    Clients[] clients;
+    Depots depot;
+
     public Vehicles() {
     }
     public Vehicles(String registrationNumber) {
         this.registrationNumber = registrationNumber;
     }
 
-    public boolean verifyUniqueness(Vehicles v, Vehicles... vehicles) {
-        for(Vehicles vehicle : vehicles) {
-            if (vehicle.equals(v)) {
-                System.out.println("Vehicle already exists..");
-                return false;
-            }
-        }
-        System.out.println("Vehicle added.");
-        return true;
+    public Vehicles(String registrationNumber, Depots depot) {
+        this.registrationNumber = registrationNumber;
+        this.depot = depot;
     }
 
     public String getRegistrationNumber() {
@@ -40,7 +36,7 @@ abstract class Vehicles {
     public Clients[] getClients() {
         return clients;
     }
-    public void setClients(Clients... clients) {
+    public void addClients(Clients... clients) {
         this.clients = clients;
     }
 
@@ -65,17 +61,29 @@ abstract class Vehicles {
         this.name = name;
     }
 
-    public abstract boolean canTour(Clients clients);
+    /**
+     * @param client the given clients that need to be toured
+     * @return true if the client can be toured
+     */
+    public abstract boolean canTour(Clients client);
 
-    @Override
-    public String toString() {
-        return "Vehicles{" +
-                "name='" + name + '\'' +
-                ", registrationNumber='" + registrationNumber + '\'' +
-                ", color='" + color + '\'' +
-                ", clients=" + Arrays.toString(clients) +
-                ", depot=" + depot +
-                '}';
+    /** verifies if the vehicle needs to be added as new
+     *
+     * @param v the vehicle that is verified
+     * @param vehicles the existing vehicles
+     * @return true if the vehicle can be added into the depot, false if it is already added into this or another depot
+     */
+    public boolean verifyUniqueness(Vehicles v, Vehicles... vehicles) {
+        for(Vehicles vehicle : vehicles) {
+            if (vehicle.equals(v)) {
+                System.out.println("Vehicle already exists..");
+                return false;
+            } else if (!vehicle.getDepot().equals(v.getDepot())) {
+                System.out.println("Vehicle is in another depot!");
+            }
+        }
+        System.out.println("Vehicle added.");
+        return true;
     }
 
     @Override
@@ -90,5 +98,16 @@ abstract class Vehicles {
         int result = Objects.hash(registrationNumber, color, name, depot);
         result = 31 * result + Arrays.hashCode(clients);
         return result;
+    }
+
+    @Override
+    public String toString() {
+        return "Vehicles{" +
+                "registrationNumber='" + registrationNumber + '\'' +
+                ", color='" + color + '\'' +
+                ", name='" + name + '\'' +
+                ", clients=" + Arrays.toString(clients) +
+                ", depot=" + depot +
+                '}';
     }
 }

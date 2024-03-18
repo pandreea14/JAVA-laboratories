@@ -2,7 +2,6 @@ import java.util.Arrays;
 
 public class Trucks extends Vehicles {
     int capacity;
-
     public Trucks(String registrationNumber, String color, String name) {
         super(registrationNumber, color, name);
     }
@@ -20,12 +19,12 @@ public class Trucks extends Vehicles {
 
     /** Verification of the tour of each vehicle
      *
-     * @param clients the clients that were added to the tour -- if there is time between client-client
+     * @param client the client that was added to the tour -- if there is time between client-client
      * @return true if we have a REGULAR client, false otherwise
      */
     @Override
-    public boolean canTour(Clients clients) {
-        return clients.type == Clients.ClientType.REGULAR;
+    public boolean canTour(Clients client) {
+        return client.clientType == Clients.Type.REGULAR;
     }
 
     @Override
