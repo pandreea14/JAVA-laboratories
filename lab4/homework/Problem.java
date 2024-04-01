@@ -35,7 +35,7 @@ public class Problem {
                 if (index1!=-1 && index2!=-1 && index1<index2) {
                     assign = 1;
                     pair.add(new Pair(passanger.getFirstName(), index1, index2));
-                    System.out.println(" -> with passanger " + passanger.getFirstName() + passanger.getLastName());
+                    System.out.println(" -> with passanger " + passanger.getFirstName());
                 }
             }
             if(assign == 0) {
